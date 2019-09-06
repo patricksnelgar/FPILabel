@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".FpiLabelActivity"
+    android:orientation="horizontal">
+
+    <LinearLayout
+        android:id="@+id/fullscreen_content_controls"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+
+    </LinearLayout>
+    <RelativeLayout
+        android:layout_height="fill_parent"
+        android:layout_width="fill_parent"
+        android:orientation="horizontal"
+        android:weightSum="1.0"
+        android:padding="0dp"
+        android:showDividers="none"
+        android:background="@color/paleGrey"
+        android:keepScreenOn="true"
+        android:id="@+id/fullscreen_content">
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Increment (+)"
+            android:id="@+id/incButton"
+            android:enabled="true"
+            android:visibility="visible"
+            android:background="#33CC33"
+            android:textColor="@color/colorTextPrimary"/>
+
+        <TextView
+            android:id="@+id/fpi_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/decButton"
+            android:layout_below="@+id/incButton"
+            android:layout_marginStart="-90dp"
+            android:layout_marginTop="-170dp"
+            android:layout_marginEnd="-90dp"
+            android:layout_marginBottom="-200dp"
+            android:keepScreenOn="true"
+            android:gravity="center_vertical"
+            android:padding="0dp"
+            android:rotation="90"
+            android:text="@string/fpi_example"
+            android:textColor="@color/colorTextPrimary"
+            android:textSize="100dp"
+            android:textStyle="bold" />
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Decrement (-)"
+            android:id="@+id/decButton"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:visibility="visible"
+            android:enabled="true"
+            android:textColor="@color/colorTextPrimary"
+            android:background="#FF5050"/>
+
+    </RelativeLayout>
+
+</FrameLayout>

@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">FPI Label</string>
+
+    <string name="fpi_example">1W-20-06a</string>
+
+    <string name="title_activity_settings">Settings</string>
+
+    <string name="recording_header">Recording</string>
+    <string name="vines_per_bay_setting">Vines per bay</string>
+    <string name="recording_method">Recording method</string>
+
+</resources>

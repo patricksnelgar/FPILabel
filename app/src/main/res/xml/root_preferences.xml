@@ -18,8 +18,10 @@
             app:title="@string/recording_method"
             app:summaryOn="Numeric"
             app:summaryOff="FPI"/>
-
+        <Preference
+            android:title="Label list"
+            android:key="label_file"
+            android:summary="test"/>
     </PreferenceCategory>
-
 
 </PreferenceScreen>

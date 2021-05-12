@@ -1,4 +1,9 @@
 <resources>
 
+    <string-array name="recording_methods_list">
+        <item>FPI</item>
+        <item>List</item>
+        <item>Numeric</item>
+    </string-array>
 
 </resources>

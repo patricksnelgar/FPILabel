@@ -9,13 +9,16 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.preference.PreferenceManager;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.TextView;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -41,6 +44,7 @@ public class FpiLabelActivity extends AppCompatActivity {
     private static final int UI_ANIMATION_DELAY = 300;
     private final Handler mHideHandler = new Handler();
     private View mContentView;
+    private String mRecordingMethod;
     private final Runnable mHidePart2Runnable = new Runnable() {
         @SuppressLint("InlinedApi")
         @Override
@@ -111,19 +115,31 @@ public class FpiLabelActivity extends AppCompatActivity {
             }
         });
 
-        // Upon interacting with UI controls, delay any scheduled hide()
-        // operations to prevent the jarring behavior of controls going away
-        // while interacting with the UI.
-        //findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
-
         PreferenceManager.setDefaultValues(this, R.xml.root_preferences, false);
+        SharedPreferences mPrefManager = PreferenceManager.getDefaultSharedPreferences(FpiLabelActivity.this);
+        mRecordingMethod = mPrefManager.getString("recording_method", "----");
 
+        Log.d("FPI Activity", "recording mode is: " + mRecordingMethod);
+
+        // Set up to use defaults
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        TextView mText = (TextView)findViewById(R.id.label_text);
+        //Log.d("FPI Activity", "I am resuming!");
+        // Set up UI depending on which method is used
+        // pull from settings and fallback on defaults
+        switch (mRecordingMethod) {
+
+        }
     }
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-
         // Trigger the initial hide() shortly after the activity has been
         // created, to briefly hint to the user that UI controls
         // are available.

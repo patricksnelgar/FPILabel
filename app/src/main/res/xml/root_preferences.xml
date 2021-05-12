@@ -2,7 +2,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory app:title="@string/recording_header">
+    <DropDownPreference
+        app:title="@string/recording_method_title"
+        app:key="recording_method"
+        app:entries="@array/recording_methods_list"
+        app:entryValues="@array/recording_methods_list"
+        app:defaultValue="Numeric"
+        app:useSimpleSummaryProvider="true"
+        />
 
         <EditTextPreference
             app:defaultValue="2"
@@ -10,18 +17,13 @@
             android:inputType="number"
             android:selectAllOnFocus="true"
             app:title="@string/vines_per_bay_setting"
-            app:useSimpleSummaryProvider="true" />
+            app:useSimpleSummaryProvider="true"
+            app:enabled="false"/>
 
-        <SwitchPreference
-            app:defaultValue="numeric"
-            app:key="recording"
-            app:title="@string/recording_method"
-            app:summaryOn="Numeric"
-            app:summaryOff="FPI"/>
         <Preference
-            android:title="Label list"
-            android:key="label_file"
-            android:summary="test"/>
-    </PreferenceCategory>
+            app:title="@string/list_method"
+            app:key="label_file"
+            app:enabled="false"
+            app:summary="----"/>
 
 </PreferenceScreen>

@@ -95,6 +95,32 @@ public class SettingsActivity extends AppCompatActivity {
                     }
                     p.setSummary(fileName);
                     break;
+                case "recording_method":
+                    String method = sp.getString("recording_method", "----");
+                    if(method != "----"){
+                        sp.edit().putString("recording_method", method).commit();
+                        switch(method){
+                            case "FPI":
+                                findPreference("vines_per_bay").setEnabled(true);
+                                findPreference("label_file").setEnabled(false);
+                                break;
+                            case "List":
+                                findPreference("vines_per_bay").setEnabled(false);
+                                findPreference("label_file").setEnabled(true);
+                                break;
+                            case "Numeric":
+                                findPreference("vines_per_bay").setEnabled(false);
+                                findPreference("label_file").setEnabled(false);
+                                break;
+                            default:
+                                Log.d("SettingsActivity", "What is this key: " + method);
+                                break;
+                        }
+                    }
+                    break;
+                case "vines_per_bay":
+                    sp.edit().putInt("vines_per_bay", sp.getInt("vines_per_bay", -1)).commit();
+                    break;
                 default:
             }
         }

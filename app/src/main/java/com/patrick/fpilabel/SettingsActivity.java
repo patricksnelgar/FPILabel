@@ -1,17 +1,22 @@
 package com.patrick.fpilabel;
 
+import android.Manifest;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.FileUtils;
+import android.provider.MediaStore;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContentResolverCompat;
+import androidx.core.content.ContextCompat;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
@@ -22,6 +27,7 @@ import java.io.FileReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -46,8 +52,6 @@ public class SettingsActivity extends AppCompatActivity {
             super.onCreate(savedInstanceState);
             getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
             SharedPreferences.Editor e = getPreferenceManager().getSharedPreferences().edit();
-            e.putString("label_file", "----");
-            e.commit();
         }
 
         @Override
@@ -58,7 +62,9 @@ public class SettingsActivity extends AppCompatActivity {
             labelList.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    Intent i = new Intent().setType("text/plain").setAction(Intent.ACTION_GET_CONTENT);
+                    Intent i = new Intent().setType("text/plain").setAction(Intent.ACTION_OPEN_DOCUMENT);
+                    i.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+                    i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     startActivityForResult(i, 7);
                     return true;
                 }
@@ -72,12 +78,14 @@ public class SettingsActivity extends AppCompatActivity {
             if(requestCode == 7 && resultCode == RESULT_OK) {
 
                 Uri uri = data.getData();
+                final int takeFlags = data.getFlags() & Intent.FLAG_GRANT_READ_URI_PERMISSION;
+                getActivity().getContentResolver().takePersistableUriPermission(uri, takeFlags);
 
                 SharedPreferences preferenceManager = getPreferenceManager().getSharedPreferences();
                 SharedPreferences.Editor editor = preferenceManager.edit();
                 Log.d("SettingsActivity", "onActivityResult: adding " + uri.getPath() + " to preferences");
-                editor.putString("label_file", uri.getPath());
-                editor.commit();
+                editor.putString("label_file", uri.toString());
+                editor.apply();
             }
         }
 
@@ -98,7 +106,7 @@ public class SettingsActivity extends AppCompatActivity {
                 case "recording_method":
                     String method = sp.getString("recording_method", "----");
                     if(method != "----"){
-                        sp.edit().putString("recording_method", method).commit();
+                        sp.edit().putString("recording_method", method).apply();
                         switch(method){
                             case "FPI":
                                 findPreference("vines_per_bay").setEnabled(true);
@@ -108,7 +116,7 @@ public class SettingsActivity extends AppCompatActivity {
                                 findPreference("vines_per_bay").setEnabled(false);
                                 findPreference("label_file").setEnabled(true);
                                 break;
-                            case "Numeric":
+                            case "Alpha-Numeric":
                                 findPreference("vines_per_bay").setEnabled(false);
                                 findPreference("label_file").setEnabled(false);
                                 break;
@@ -119,10 +127,11 @@ public class SettingsActivity extends AppCompatActivity {
                     }
                     break;
                 case "vines_per_bay":
-                    sp.edit().putInt("vines_per_bay", sp.getInt("vines_per_bay", -1)).commit();
+                    sp.edit().putInt("vines_per_bay", sp.getInt("vines_per_bay", -1)).apply();
                     break;
                 default:
             }
         }
+
     }
 }

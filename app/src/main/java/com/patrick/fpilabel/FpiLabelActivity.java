@@ -1,15 +1,22 @@
 package com.patrick.fpilabel;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.PathUtils;
 import androidx.preference.PreferenceManager;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -19,6 +26,21 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.nio.Buffer;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -45,6 +67,7 @@ public class FpiLabelActivity extends AppCompatActivity {
     private final Handler mHideHandler = new Handler();
     private View mContentView;
     private String mRecordingMethod;
+    private final String mTAG = "Label Activity";
     private final Runnable mHidePart2Runnable = new Runnable() {
         @SuppressLint("InlinedApi")
         @Override
@@ -119,23 +142,60 @@ public class FpiLabelActivity extends AppCompatActivity {
         SharedPreferences mPrefManager = PreferenceManager.getDefaultSharedPreferences(FpiLabelActivity.this);
         mRecordingMethod = mPrefManager.getString("recording_method", "----");
 
-        Log.d("FPI Activity", "recording mode is: " + mRecordingMethod);
+        Log.d(mTAG, "recording mode is: " + mRecordingMethod);
 
+        TextView mLabel = (TextView)findViewById(R.id.label_text);
         // Set up to use defaults
-
+        switch(mRecordingMethod) {
+            case "FPI":
+                mLabel.setText(R.string.fpi_default);
+                break;
+            case "List":
+                mLabel.setText(R.string.list_default);
+                break;
+            case "Alpha-Numeric":
+                mLabel.setText(R.string.alpha_numeric_default);
+                break;
+            default:
+                mLabel.setText("Uh..HI??");
+                break;
+        }
     }
+
 
     @Override
     protected void onResume() {
         super.onResume();
         TextView mText = (TextView)findViewById(R.id.label_text);
-        //Log.d("FPI Activity", "I am resuming!");
+        //Log.d(mTAG, "I am resuming!");
         // Set up UI depending on which method is used
         // pull from settings and fallback on defaults
-        switch (mRecordingMethod) {
 
+        SharedPreferences mPrefManager = PreferenceManager.getDefaultSharedPreferences(FpiLabelActivity.this);
+        String mLastValue = mPrefManager.getString("last_recording_value", "");
+        mRecordingMethod = mPrefManager.getString("recording_method", "----");
+
+        Log.d(mTAG, "Last value is: <" + mLastValue + ">");
+
+        TextView mLabel = (TextView)findViewById(R.id.label_text);
+
+        switch(mRecordingMethod) {
+            case "FPI":
+                mLabel.setText(R.string.fpi_default);
+                break;
+            case "List":
+                mLabel.setText(getListItem(mLastValue));
+                break;
+            case "Alpha-Numeric":
+                mLabel.setText(R.string.alpha_numeric_default);
+                break;
+            default:
+                mLabel.setText("You broke it");
+                break;
         }
     }
+
+
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
@@ -204,5 +264,33 @@ public class FpiLabelActivity extends AppCompatActivity {
     private void delayedHide(int delayMillis) {
         mHideHandler.removeCallbacks(mHideRunnable);
         mHideHandler.postDelayed(mHideRunnable, delayMillis);
+    }
+
+    /**
+     * For list mode only
+     *
+     * @param lastValue last index into the list of labels
+     * @return next item in the label list
+     */
+    private String getListItem(String lastValue) {
+        String res = "";
+
+        // Get the label file
+        SharedPreferences mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(FpiLabelActivity.this);
+
+        try {
+            Uri mUri = Uri.parse(mSharedPrefs.getString("label_file", ""));
+            Log.d(mTAG, "URI: " + mUri.getPath());
+            final int takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION;
+            getContentResolver().takePersistableUriPermission(mUri, takeFlags);
+            InputStream mIS = getContentResolver().openInputStream(mUri);
+            BufferedReader mBR = new BufferedReader(new InputStreamReader(mIS));
+            res = mBR.readLine();
+            Log.d(mTAG, "First line: " + res);
+
+        } catch (Exception e) {
+            Log.e(mTAG, "error: " + e.getLocalizedMessage());
+        }
+        return res;
     }
 }

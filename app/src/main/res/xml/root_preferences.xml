@@ -7,7 +7,7 @@
         app:key="recording_method"
         app:entries="@array/recording_methods_list"
         app:entryValues="@array/recording_methods_list"
-        app:defaultValue="Numeric"
+        app:defaultValue="Alpha-Numeric"
         app:useSimpleSummaryProvider="true"
         />
 
@@ -24,6 +24,6 @@
             app:title="@string/list_method"
             app:key="label_file"
             app:enabled="false"
-            app:summary="----"/>
+            app:summary=""/>
 
 </PreferenceScreen>

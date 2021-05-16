@@ -25,7 +25,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -68,6 +71,7 @@ public class FpiLabelActivity extends AppCompatActivity {
     private View mContentView;
     private String mRecordingMethod;
     private final String mTAG = "Label Activity";
+    private final String PREFERENCES_LAST_RECORDING_VALUE = "last_recording_value";
     private final Runnable mHidePart2Runnable = new Runnable() {
         @SuppressLint("InlinedApi")
         @Override
@@ -129,6 +133,11 @@ public class FpiLabelActivity extends AppCompatActivity {
         mControlsView = findViewById(R.id.fullscreen_content_controls);
         mContentView = findViewById(R.id.fullscreen_content);
 
+        Button mDecButton = (Button)findViewById(R.id.decButton);
+        mDecButton.setOnClickListener(mDecButtonListener);
+
+        Button mIncButton = (Button)findViewById(R.id.incButton);
+        mIncButton.setOnClickListener(mIncButtonListener);
 
         // Set up the user interaction to manually show or hide the system UI.
         mContentView.setOnClickListener(new View.OnClickListener() {
@@ -172,10 +181,9 @@ public class FpiLabelActivity extends AppCompatActivity {
         // pull from settings and fallback on defaults
 
         SharedPreferences mPrefManager = PreferenceManager.getDefaultSharedPreferences(FpiLabelActivity.this);
-        String mLastValue = mPrefManager.getString("last_recording_value", "");
-        mRecordingMethod = mPrefManager.getString("recording_method", "----");
+        int mLastValue = Integer.parseInt(mPrefManager.getString(PREFERENCES_LAST_RECORDING_VALUE, "0"));
 
-        Log.d(mTAG, "Last value is: <" + mLastValue + ">");
+        mRecordingMethod = mPrefManager.getString("recording_method", "----");
 
         TextView mLabel = (TextView)findViewById(R.id.label_text);
 
@@ -194,8 +202,6 @@ public class FpiLabelActivity extends AppCompatActivity {
                 break;
         }
     }
-
-
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
@@ -272,7 +278,7 @@ public class FpiLabelActivity extends AppCompatActivity {
      * @param lastValue last index into the list of labels
      * @return next item in the label list
      */
-    private String getListItem(String lastValue) {
+    private String getListItem(int lastValue) {
         String res = "";
 
         // Get the label file
@@ -280,17 +286,88 @@ public class FpiLabelActivity extends AppCompatActivity {
 
         try {
             Uri mUri = Uri.parse(mSharedPrefs.getString("label_file", ""));
-            Log.d(mTAG, "URI: " + mUri.getPath());
+            //Log.d(mTAG, "URI: " + mUri.getPath());
             final int takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION;
             getContentResolver().takePersistableUriPermission(mUri, takeFlags);
             InputStream mIS = getContentResolver().openInputStream(mUri);
             BufferedReader mBR = new BufferedReader(new InputStreamReader(mIS));
-            res = mBR.readLine();
-            Log.d(mTAG, "First line: " + res);
+            int index = 0;
+            String mPrevLabel = res;
+            if(lastValue > 0){
+                while(index < lastValue + 1) {
+                    try {
+
+                        mPrevLabel = res;
+                        res = mBR.readLine();
+                        Log.d(mTAG, "Target = " + lastValue + " Prev = " + mPrevLabel + " next = " + res);
+                        if(res == null) {
+                            res = mPrevLabel;
+                            break;
+                        }
+                    }catch (Exception e) {
+                        Log.e(mTAG, "Error reading file: " + e.getLocalizedMessage());
+                    }
+                    index++;
+                }
+            } else {
+                res = mBR.readLine();
+            }
 
         } catch (Exception e) {
             Log.e(mTAG, "error: " + e.getLocalizedMessage());
         }
         return res;
     }
+
+    private final View.OnClickListener mDecButtonListener = new View.OnClickListener() {
+
+        @Override
+        public void onClick(View view) {
+            if(mRecordingMethod.equals("List")) {
+
+                SharedPreferences mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(FpiLabelActivity.this);
+                int mPrevIndex = Integer.parseInt(mSharedPrefs.getString(PREFERENCES_LAST_RECORDING_VALUE, "0"));
+                mPrevIndex--;
+                TextView mLabelText = (TextView)findViewById(R.id.label_text);
+                String mPrevLabel = mLabelText.getText().toString();
+                String mNewLabel = getListItem(mPrevIndex);
+
+                if(mNewLabel.equals(mPrevLabel))
+                    mPrevIndex++;
+
+                Log.d(mTAG, "Index: " + mPrevIndex + " - new label: " + mNewLabel);
+
+                mLabelText.setText(mNewLabel);
+
+                String mCurrentIndex = Integer.toString(mPrevIndex);
+                mSharedPrefs.edit().putString(PREFERENCES_LAST_RECORDING_VALUE, mCurrentIndex).apply();
+            }
+        }
+    };
+
+    private final View.OnClickListener mIncButtonListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            if(mRecordingMethod.equals("List")) {
+
+                SharedPreferences mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(FpiLabelActivity.this);
+                int mPrevIndex = Integer.parseInt(mSharedPrefs.getString(PREFERENCES_LAST_RECORDING_VALUE, "0"));
+                mPrevIndex++;
+                TextView mLabelText = (TextView)findViewById(R.id.label_text);
+                String mPrevLabel = mLabelText.getText().toString();
+                String mNewLabel = getListItem(mPrevIndex);
+
+                if(mNewLabel.equals(mPrevLabel))
+                    mPrevIndex--;
+
+                mLabelText.setText(mNewLabel);
+                Log.d(mTAG, "Index: " + mPrevIndex + " - new label: " + mNewLabel);
+
+
+
+                String mCurrentIndex = Integer.toString(mPrevIndex);
+                mSharedPrefs.edit().putString(PREFERENCES_LAST_RECORDING_VALUE, mCurrentIndex).apply();
+            }
+        }
+    };
 }

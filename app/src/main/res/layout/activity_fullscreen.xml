@@ -48,7 +48,7 @@
             android:padding="0dp"
             android:rotation="90"
             android:textColor="@color/colorTextPrimary"
-            android:textSize="100dp"
+            android:textSize="150sp"
             android:textStyle="bold" />
         <Button
             android:layout_width="fill_parent"

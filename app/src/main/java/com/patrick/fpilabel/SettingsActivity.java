@@ -57,7 +57,19 @@ public class SettingsActivity extends AppCompatActivity {
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey);
+            SharedPreferences sp = getPreferenceManager().getSharedPreferences();
 
+            // get recording method and set visibility of preferences
+            // accordingly
+            String mRecordingMethod = sp.getString("recording_method", "----");
+            if(!mRecordingMethod.equals("----")) {
+                setPreferenceVisibility(mRecordingMethod);
+            } else {
+                Log.e("Preference setup", "unknown recording method" + mRecordingMethod);
+            }
+
+
+            // Label file summary
             Preference labelList = (Preference) findPreference("label_file");
             labelList.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
@@ -69,6 +81,13 @@ public class SettingsActivity extends AppCompatActivity {
                     return true;
                 }
             });
+
+            String t[] = sp.getString("label_file", "").split("%2F");
+            String fileName = "----";
+            if(t.length > 1){
+                fileName = t[t.length - 1];
+            }
+            labelList.setSummary(fileName);
         }
 
         @Override
@@ -83,7 +102,7 @@ public class SettingsActivity extends AppCompatActivity {
 
                 SharedPreferences preferenceManager = getPreferenceManager().getSharedPreferences();
                 SharedPreferences.Editor editor = preferenceManager.edit();
-                Log.d("SettingsActivity", "onActivityResult: adding " + uri.getPath() + " to preferences");
+                Log.d("SettingsActivity", "onActivityResult: adding " + uri.toString() + " to preferences");
                 editor.putString("label_file", uri.toString());
                 editor.apply();
             }
@@ -96,7 +115,8 @@ public class SettingsActivity extends AppCompatActivity {
             switch (s){
                 case "label_file":
                     Preference p = findPreference(s);
-                    String t[] = sp.getString("label_file", "").split("/");
+                    // Need to use %2F as the split because the uri path encoding it as the directory marker
+                    String t[] = sp.getString("label_file", "").split("%2F");
                     String fileName = "----";
                     if(t.length > 1){
                         fileName = t[t.length - 1];
@@ -107,23 +127,7 @@ public class SettingsActivity extends AppCompatActivity {
                     String method = sp.getString("recording_method", "----");
                     if(method != "----"){
                         sp.edit().putString("recording_method", method).apply();
-                        switch(method){
-                            case "FPI":
-                                findPreference("vines_per_bay").setEnabled(true);
-                                findPreference("label_file").setEnabled(false);
-                                break;
-                            case "List":
-                                findPreference("vines_per_bay").setEnabled(false);
-                                findPreference("label_file").setEnabled(true);
-                                break;
-                            case "Alpha-Numeric":
-                                findPreference("vines_per_bay").setEnabled(false);
-                                findPreference("label_file").setEnabled(false);
-                                break;
-                            default:
-                                Log.d("SettingsActivity", "What is this key: " + method);
-                                break;
-                        }
+                        setPreferenceVisibility(method);
                     }
                     break;
                 case "vines_per_bay":
@@ -133,5 +137,24 @@ public class SettingsActivity extends AppCompatActivity {
             }
         }
 
+        private void setPreferenceVisibility(String m){
+            switch(m){
+                case "FPI":
+                    findPreference("vines_per_bay").setEnabled(true);
+                    findPreference("label_file").setEnabled(false);
+                    break;
+                case "List":
+                    findPreference("vines_per_bay").setEnabled(false);
+                    findPreference("label_file").setEnabled(true);
+                    break;
+                case "Alpha-Numeric":
+                    findPreference("vines_per_bay").setEnabled(false);
+                    findPreference("label_file").setEnabled(false);
+                    break;
+                default:
+                    Log.d("SettingsActivity", "What is this key: " + m);
+                    break;
+            }
+        }
     }
 }

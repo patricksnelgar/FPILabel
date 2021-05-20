@@ -1,4 +1,4 @@
-package com.patrick.fpilabel;
+package com.patrick.fisheyelabel;
 
 import android.Manifest;
 import android.content.ContentResolver;
@@ -20,6 +20,8 @@ import androidx.core.content.ContextCompat;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
+
+import com.patrick.fpilabel.R;
 
 import java.io.BufferedReader;
 import java.io.File;

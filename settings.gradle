@@ -1,2 +1,2 @@
 include ':app'
-rootProject.name='FPI Label'
+rootProject.name='Fisheye Label'

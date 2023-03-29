@@ -124,12 +124,14 @@ public class SettingsActivity extends AppCompatActivity {
                         fileName = t[t.length - 1];
                     }
                     p.setSummary(fileName);
+                    sp.edit().putString("last_recording_value", "0").apply();
                     break;
                 case "recording_method":
                     String method = sp.getString("recording_method", "----");
                     if(method != "----"){
                         sp.edit().putString("recording_method", method).apply();
                         setPreferenceVisibility(method);
+                        sp.edit().putString("last_recording_value", "0").apply();
                     }
                     break;
                 case "vines_per_bay":
